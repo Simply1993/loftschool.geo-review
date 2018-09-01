@@ -1,10 +1,10 @@
-# Учебный проект Другофильтр
+# Учебный проект Геоотзыв
 
 **Студент**: Евгений Щербаков
 
 **Наставник**: Алексей Трубин
 
-**Ссылка на проект**: https://simply1993.github.io/loftschool.friend-filter/dist
+**Ссылка на проект**: https://simply1993.github.io/loftschool.geo-review/dist
 
 > Перед установкой зависимостей и запуском проекта убедитесь, что у вас установлена [последняя версия Node.js & NPM](https://nodejs.org/en/download/current/)
 
