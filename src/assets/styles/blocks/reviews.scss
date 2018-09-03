@@ -1,0 +1,33 @@
+.reviews__item {
+  margin-bottom: 25px;
+}
+
+.reviews__author {
+  font-weight: 500;
+  color: #4f4f4f;
+  font-size: 16px;
+  display: inline-block;
+}
+
+.reviews__place {
+  font-weight: 400;
+  color: #4f4f4f;
+  font-size: 16px;
+  display: inline-block;
+  opacity: .75;
+}
+
+.reviews__date {
+  font-weight: 400;
+  color: #4f4f4f;
+  font-size: 14px;
+  display: inline-block;
+  opacity: .75;
+}
+
+.reviews__text {
+  font-weight: 400;
+  color: #4f4f4f;
+  font-size: 15px;
+  display: block;
+}
