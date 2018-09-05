@@ -1,36 +1,31 @@
 .balloon
     .balloon__header
-        .balloon__title Невский пр., 78, Санкт-Петербург, 191025
+        .balloon__title= `${address}`
         button.balloon__close
     .balloon__content
         .balloon__reviews.reviews
             ul.reviews__list
-                li.reviews__item
-                    .reviews__author svetlana
-                    .reviews__place Шоколадница
-                    .reviews__date 13.12.2015
-                    .reviews__text Очень хорошее место!
-                li.reviews__item
-                    .reviews__author Сергей Мелюков
-                    .reviews__place Красный куб
-                    .reviews__date 12.12.2015
-                    .reviews__text Ужасное место! Кругом зомби!
-                li.reviews__item
-                    .reviews__author svetlana
-                    .reviews__place Шоколадница
-                    .reviews__date 13.12.2015
-                    .reviews__text Очень хорошее место!
+                if reviews
+                    each review in reviews
+                        li.reviews__item
+                            .reviews__author= `${review.name}`
+                            .reviews__place= `${review.place}`
+                            .reviews__date= `${review.date}`
+                            .reviews__text= `${review.comment}`
+                else
+                    li.reviews__item
+                        .reviews__text Отзывов пока нет...
         .balloon__form.review-form
-            form.review-form__area
+            form.review-form__area#new-review
                 .review-form__title Ваш отзыв
                 .review-form__fields
                     .review-form__field
                         label.review-form__field-label Ваше имя
-                        input.review-form__field-input(placeholder='Ваше имя')
+                        input.review-form__field-input(placeholder='Ваше имя' name='name')
                     .review-form__field
                         label.review-form__field-label Укажите место
-                        input.review-form__field-input(placeholder='Укажите место')
+                        input.review-form__field-input(placeholder='Укажите место' name='place')
                     .review-form__field
                         label.review-form__field-label Поделитесь впечатлениями
-                        textarea.review-form__field-textarea(placeholder='Поделитесь впечатлениями' rows='5')
+                        textarea.review-form__field-textarea(placeholder='Поделитесь впечатлениями' rows='5' name='comment')
                 button.review-form__button Добавить

@@ -2,7 +2,6 @@ import { loadReviews, addPlacemark } from "./data";
 
 export default function initMap(ymaps, containerId) {
   const cache = new Map();
-  let placemarks = [];
   let marks = {
     "55.76-37.64": [
       {
@@ -38,8 +37,6 @@ export default function initMap(ymaps, containerId) {
   localStorage.setItem("loftschool-georeviews", JSON.stringify(marks));
 
   let reviewsMap = loadReviews();
-  console.log("reviews", reviewsMap);
-
   const myMap = new ymaps.Map(
     containerId,
     {
@@ -63,18 +60,83 @@ export default function initMap(ymaps, containerId) {
 
     return cache.get(coords.join("-"));
   }
+  function openBalloon(coords) {
+    myMap.balloon.close();
+    myMap.setCenter(coords);
+    getAddress(coords).then(address => {
+      let popup = document.getElementById("popup");
+      let templateBalloon = require("pug-loader!../../views/templates/balloon.pug");
+      let options = { address };
+      if (marks[coords.join("-")]) {
+        options.reviews = marks[coords.join("-")];
+      }
+      let html = templateBalloon(options);
+      if (popup) {
+        popup.innerHTML = html;
+      } else {
+        popup = document.createElement("div");
+        popup.id = "popup";
+        popup.style.position = "absolute";
+        popup.style.left = document.body.offsetWidth / 2 - 190 + "px";
+        popup.style.top = document.body.offsetHeight / 2 - 250 + "px";
+        popup.innerHTML = html;
+        document.body.appendChild(popup);
+      }
+      let btnClose = popup.querySelector(".balloon__close");
+      let btnAdd = popup.querySelector(".review-form__button");
+      btnClose.addEventListener("click", () => popup.remove());
+      btnAdd.addEventListener("click", e => {
+        e.preventDefault();
+        let formFields = document.forms["new-review"].elements;
+        let review = {
+          name: formFields.name.value,
+          place: formFields.place.value,
+          comment: formFields.comment.value,
+          date: new Date()
+            .toJSON()
+            .slice(0, 10)
+            .split("-")
+            .reverse()
+            .join(".")
+        };
 
-  function openBalloon(point) {
-    var state = clusterer.getObjectState(point),
-      cluster = state.isClustered && state.cluster;
+        if (review.name && review.place && review.comment) {
+          const myPlacemark = addPlacemark(ymaps, coords);
+          clusterer.add(myPlacemark);
 
-    if (cluster) {
-      cluster.state.set("activeObject", point);
-      cluster.balloon.open();
-    } else {
-      point.balloon.open();
-    }
+          if (!reviewsMap[this.coords.join("-")]) {
+            reviewsMap[this.coords.join("-")] = [];
+          }
+
+          reviewsMap[coords.join("-")].push(review);
+          openBalloon(coords);
+        }
+      });
+    });
   }
+
+  myMap.events.add("click", e => openBalloon(e.get("coords")));
+  myMap.geoObjects.events.add("click", function(e) {
+    if (e.get("target").balloon) {
+      e.preventDefault();
+      openBalloon(e.get("target").geometry.getCoordinates());
+    } else {
+      console.log("cluster");
+    }
+  });
+
+  //открываем балун по клику на карте через API
+  /*myMap.events.add("click", function(e) {
+    if (!myMap.balloon.isOpen()) {
+      var coords = e.get("coords");
+      myMap.balloon.open(coords, {
+        balloonLayout: BalloonContentLayout
+        // [coords[0].toPrecision(6), coords[1].toPrecision(6)].join(", ")
+      });
+    } else {
+      myMap.balloon.close();
+    }
+  });*/
 
   const customItemContentLayout = ymaps.templateLayoutFactory.createClass(
     `<div class="ballon__header">
@@ -95,13 +157,6 @@ export default function initMap(ymaps, containerId) {
         });
         elemAddress.addEventListener("click", e => {
           e.preventDefault();
-
-          let current = ymaps
-            .geoQuery(placemarks)
-            .search(`lat=${this.getData().properties._data.lat}`)
-            .search(`long=${this.getData().properties._data.long}`)
-            .get(0);
-          openBalloon(current);
         });
       }
     }
@@ -122,7 +177,8 @@ export default function initMap(ymaps, containerId) {
   });
   myMap.geoObjects.add(clusterer);
 
-  const BalloonContentLayout = ymaps.templateLayoutFactory.createClass(
+  //кастомный шаблон балуна метки на API
+  /*const BalloonContentLayout = ymaps.templateLayoutFactory.createClass(
     `<div class="balloon">
       <div class="balloon__header">
         <div class="balloon__title"></div>
@@ -240,23 +296,21 @@ export default function initMap(ymaps, containerId) {
           formFields.name.value = "";
           formFields.place.value = "";
           formFields.comment.value = "";
-          console.log(reviewsMap);
         }
       }
     }
-  );
+  );*/
 
   //добавление сохранённых меток на карту
   for (let coords in reviewsMap) {
     reviewsMap[coords].map(elem => {
-      [elem.lat, elem.long] = coords.split("-");
+      //[elem.lat, elem.long] = coords.split("-");
       const myPlacemark = addPlacemark(
         ymaps,
-        elem,
-        BalloonContentLayout,
-        reviewsMap[coords]
+        coords.split("-")
+        //BalloonContentLayout,
+        //reviewsMap[coords]
       );
-      placemarks.push(myPlacemark);
       clusterer.add(myPlacemark);
     });
   }
